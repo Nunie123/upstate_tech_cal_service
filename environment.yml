@@ -1,0 +1,7 @@
+name: cal_service
+dependencies:
+  - python=3.6
+  - pip:
+    - Flask==0.12.2
+    - simplejson==3.11.1
+    - requests==2.18.4
