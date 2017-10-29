@@ -14,24 +14,26 @@ This application saves the data locally and then exposes the locally saved file.
 
 The format of the JSON that returns is:
 
-  `[{
-    'event_name': 'Tuesday Hack Night',
-    'group_name': 'Upstate Hackers',
-    'venue': {'name': 'Greenville Open Data HQ',
-              'address': '101 N. Main St., 3rd Floor',
-              'city': 'Greenville',
-              'state': 'SC',
-              'zip': '29605',
-              'country': 'US',
-              'lat': 34.851616,
-              'lon': -82.398392}
-    'url': 'https://data.openupstate.org/',
-    'time': '2017-12-24T15:30:00Z',
-    'rsvp_count': 42,
-    'created_at': '2017-07-04T10:05:00Z',
-    'description': 'Let's meet up and hack everything!',
-    'data_as_of': '2017-10-29T18:29:14Z'
+
+    [{
+      'event_name': 'Tuesday Hack Night',
+      'group_name': 'Upstate Hackers',
+      'venue': {'name': 'Greenville Open Data HQ',
+                'address': '101 N. Main St., 3rd Floor',
+                'city': 'Greenville',
+                'state': 'SC',
+                'zip': '29605',
+                'country': 'US',
+                'lat': 34.851616,
+                'lon': -82.398392}
+      'url': 'https://data.openupstate.org/',
+      'time': '2017-12-24T15:30:00Z',
+      'rsvp_count': 42,
+      'created_at': '2017-07-04T10:05:00Z',
+      'description': 'Let's meet up and hack everything!',
+      'data_as_of': '2017-10-29T18:29:14Z'
     }, ...]`
+
 Note:
 * All timestamps are in UTC.  
 * Some of the description fields include html markup from the host sites.  This application does not verify that there is nothing malicious in the included markup.
