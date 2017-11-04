@@ -43,8 +43,9 @@ def refresh_all_meetings():
 def get_group_list():
     url = 'https://data.openupstate.org/rest/organizations?org_status=active'
     r = requests.get(url)
-    if 0: #r.status_code != 200:
+    if r.status_code != 200:
         raise Exception('Could not connect to OpenUpstate API at {}.  Status Code: {}'.format(url, r.status_code))
+    print(r.text)
     data = json.loads(r.text)    # current meeting sources: '', 'Facebook', 'Nvite', 'Eventbrite', 'Meetup', 'Unknown', 'Open Collective'
     all_sources = [x["field_event_service"] for x in data]
     all_sources = list(set(all_sources))    #removes duplicates

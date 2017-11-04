@@ -315,7 +315,8 @@ eventbrite_venues_list = [{
   }
 ]
 
-open_upstate_response_text = [
+open_upstate_response_text = '''
+[
   {
     "title": "1 Million Cups",
     "path": "https://data.openupstate.org/organization/1-million-cups",
@@ -351,3 +352,4 @@ open_upstate_response_text = [
     "uuid": "252d42a8-fa62-480f-899b-132bf870c408"
   }
 ]
+'''

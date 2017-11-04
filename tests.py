@@ -1,7 +1,7 @@
 import test_fixtures as fixtures
 import app
 import unittest
-from unittest.mock import Mock, patch
+import unittest.mock as mock
 
 class TestEventList(unittest.TestCase):
     # testing functions in app.py
@@ -22,15 +22,13 @@ class TestEventList(unittest.TestCase):
         self.assertTrue(isinstance(output[0], dict))    #first item in list is dictionary
         self.assertTrue(len(list(output[0].keys())))    #first dictionary is not empty
 
-    @patch('app.requests.get')
+    @mock.patch('app.requests.get')
     def test_get_group_list(self, mock_get):
-        # mock_response = Mock()
-        # mock_response.json.return_value = fixtures.open_upstate_response_text
-        # # mock_get.return_value.text = fixtures.open_upstate_response_text
-        # # mock_get.return_value.status_code = 200
-        # mock_get.return_value.text = mock_response
-        mock_resp = self._mock_response(json_data=fixtures.open_upstate_response_text)
-        mock_get.return_value = mock_resp
+        mock_response = mock.MagicMock()
+        mock_response.text = fixtures.open_upstate_response_text
+        mock_response.status_code = 200
+        mock_get.return_value = mock_response
+
 
         output = app.get_group_list()
         self.assertTrue(isinstance(output, dict))       #returns a dictionary
