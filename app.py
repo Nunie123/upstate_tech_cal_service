@@ -26,13 +26,13 @@ app.config['SECRET_KEY'] = config.get('flask','Secret_key')
 
 # Gets list of groups, concatenates meeting lists for all groups, then saves json locally.
 def refresh_all_meetings():
-    group_list = get_group_list()
-    meetup_events = get_meetup_events(group_list['Meetup'])
-    eventbrite_events = get_eventbrite_events(group_list['Eventbrite'])
+    group_lists = get_group_lists()
+    meetup_events = get_meetup_events(group_lists['Meetup'])
+    eventbrite_events = get_eventbrite_events(group_lists['Eventbrite'])
     eventbrite_venues = get_eventbrite_venues(eventbrite_events)
     events = (
         format_meetup_events(meetup_events)
-        + format_eventbrite_events(events_list=eventbrite_events, venues_list=eventbrite_venues, group_list=group_list['Eventbrite'])
+        + format_eventbrite_events(events_list=eventbrite_events, venues_list=eventbrite_venues, group_list=group_lists['Eventbrite'])
         )
     with open('all_meetings.json', 'w') as outfile:
         json.dump(events, outfile)
@@ -40,19 +40,18 @@ def refresh_all_meetings():
 
 
 # Queries openupstate API for list of groups. Returns dictionary with each source as key (e.g. 'Meetup', 'Eventbrite')
-def get_group_list():
+def get_group_lists():
     url = 'https://data.openupstate.org/rest/organizations?org_status=active'
     r = requests.get(url)
     if r.status_code != 200:
         raise Exception('Could not connect to OpenUpstate API at {}.  Status Code: {}'.format(url, r.status_code))
-    print(r.text)
     data = json.loads(r.text)    # current meeting sources: '', 'Facebook', 'Nvite', 'Eventbrite', 'Meetup', 'Unknown', 'Open Collective'
     all_sources = [x["field_event_service"] for x in data]
     all_sources = list(set(all_sources))    #removes duplicates
-    sorted_sources = {}
+    groups_by_source = {}
     for source in all_sources:
-        sorted_sources[source] = [i for i in data if i['field_event_service'] == source]
-    return sorted_sources
+        groups_by_source[source] = [i for i in data if i['field_event_service'] == source]
+    return groups_by_source
 
 # Takes list of groups and makes API call to Meetup.com to get event details. Returns list.
 def get_meetup_events(group_list):
@@ -116,7 +115,7 @@ def get_eventbrite_events(group_list):
             events += events_list
     return events
 
-# Takes list of events hosted on EventBrite and returns list of unique venues.
+# Takes list of events hosted on EventBrite and returns list of unique venue dictionaries.
 def get_eventbrite_venues(events_list):
     venue_ids = []
     token = config.get('eventbrite','token')
