@@ -1,0 +1,36 @@
+[
+  {
+    "title": "1 Million Cups",
+    "path": "https://data.openupstate.org/organization/1-million-cups",
+    "changed": "2017-03-28T21:51:11-0400",
+    "field_city": "Greenville",
+    "field_event_service": "Eventbrite",
+    "field_events_api_key": "13045767574",
+    "field_focus_area": "Entrepreneurship",
+    "field_homepage": "http://www.1millioncups.com/greenville/",
+    "nid": "54",
+    "field_org_status": "Active",
+    "field_primary_contact_email": "phil@ta5.com",
+    "field_primary_contact_person": "Phil Yanov",
+    "field_regular_day_of_the_month": "First Wednesday, Second Wednesday, Third Wednesday, Fourth Wednesday",
+    "field_regular_start_time": "8:00 AM",
+    "uuid": "62e6773f-f5b9-4432-8b8f-2afd0eb6649e"
+  },
+  {
+    "title": "ACM - Association for Computing Machinery",
+    "path": "https://data.openupstate.org/organization/acm-association-for-computing-machinery",
+    "changed": "2017-03-28T20:30:53-0400",
+    "field_city": "Greenville",
+    "field_event_service": "Meetup",
+    "field_events_api_key": "20727833",
+    "field_focus_area": "Computer Science",
+    "field_homepage": "http://local.acm.org/cities/greenville/",
+    "nid": "53",
+    "field_org_status": "Active",
+    "field_primary_contact_email": "glen@organicdesign.org",
+    "field_primary_contact_person": "Glen Peterson",
+    "field_regular_day_of_the_month": "Second Thursday",
+    "field_regular_start_time": "6:00 PM",
+    "uuid": "252d42a8-fa62-480f-899b-132bf870c408"
+  }
+]

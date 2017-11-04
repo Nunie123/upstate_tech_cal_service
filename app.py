@@ -26,37 +26,47 @@ app.config['SECRET_KEY'] = config.get('flask','Secret_key')
 
 # Gets list of groups, concatenates meeting lists for all groups, then saves json locally.
 def refresh_all_meetings():
-    meeting_list = get_meeting_list()
+    group_list = get_group_list()
+    meetup_events = get_meetup_events(group_list['Meetup'])
+    eventbrite_events = get_eventbrite_events(group_list['Eventbrite'])
+    eventbrite_venues = get_eventbrite_venues(eventbrite_events)
     events = (
-        get_meetup_events(meeting_list['Meetup'])
-        + get_eventbrite_events(meeting_list['Eventbrite'])
+        format_meetup_events(meetup_events)
+        + format_eventbrite_events(events_list=eventbrite_events, venues_list=eventbrite_venues, group_list=group_list['Eventbrite'])
         )
     with open('all_meetings.json', 'w') as outfile:
         json.dump(events, outfile)
     return events
 
 
-# Queries openupstate API for list of groups describing where they host event info
-def get_meeting_list():
+# Queries openupstate API for list of groups. Returns dictionary with each source as key (e.g. 'Meetup', 'Eventbrite')
+def get_group_list():
     url = 'https://data.openupstate.org/rest/organizations?org_status=active'
     r = requests.get(url)
+    if 0: #r.status_code != 200:
+        raise Exception('Could not connect to OpenUpstate API at {}.  Status Code: {}'.format(url, r.status_code))
     data = json.loads(r.text)    # current meeting sources: '', 'Facebook', 'Nvite', 'Eventbrite', 'Meetup', 'Unknown', 'Open Collective'
     all_sources = [x["field_event_service"] for x in data]
-    all_sources = list(set(all_sources))
+    all_sources = list(set(all_sources))    #removes duplicates
     sorted_sources = {}
     for source in all_sources:
-        sorted_sources[source] = [i for i in data if i['field_event_service'] == source and i['field_events_api_key'] != '7709021031'] # this key is for Greer Programmers Group, but is wrong
+        sorted_sources[source] = [i for i in data if i['field_event_service'] == source]
     return sorted_sources
 
 # Takes list of groups and makes API call to Meetup.com to get event details. Returns list.
-def get_meetup_events(meeting_list):
-    group_ids = [i['field_events_api_key'] for i in meeting_list]
+def get_meetup_events(group_list):
+    group_ids = [i['field_events_api_key'] for i in group_list]
     group_ids_str = ','.join(str(group_id) for group_id in group_ids)
     api_key = config.get('meetup','api_key')
     url = 'https://api.meetup.com/2/events?key={key}&group_id={ids}'.format(key=api_key, ids=group_ids_str)
     r = requests.get(url)
+    if r.status_code != 200:
+        raise Exception('Could not connect to Meetup API at {}.  Status Code: {}'.format(url, r.status_code))
     data = json.loads(r.text)
-    events_raw = data['results']
+    return data['results']
+
+# Takes list of events from Meetup and returns formatted list of events
+def format_meetup_events(events_raw):
     events=[]
     for event in events_raw:
         if event.get('venue'):
@@ -89,51 +99,70 @@ def get_meetup_events(meeting_list):
         events.append(event_dict)
     return events
 
-# Takes list of groups and makes API call to EventBrite to get event details. Returns list.
-def get_eventbrite_events(meeting_list):
-    group_ids = [i['field_events_api_key'] for i in meeting_list]
+# Takes list of groups hosted on EventBrite and returns list of events.
+def get_eventbrite_events(group_list):
+    group_ids = [i['field_events_api_key'] for i in group_list if i['field_events_api_key'] != '']
     token = config.get('eventbrite','token')
     events=[]
     for group_id in group_ids:
         url = 'https://www.eventbriteapi.com/v3/organizers/{}/events/'.format(group_id)
         r = requests.get(url,headers = {"Authorization": "Bearer {}".format(token)},verify = True)
+        if r.status_code != 200:
+            raise Exception('Could not connect to Eventbrite API at {}.  Status Code: {}'.format(url, r.status_code))
         data = json.loads(r.text)
         if data.get('events'):
             events_list = data.get('events')
-            venue_ids = []
-            for event in events_list:
-                venue_ids.append(event['venue_id'])
-            venue_ids = list(set(venue_ids))
-            venues={}
-            for venue_id in venue_ids:
-                url = 'https://www.eventbriteapi.com/v3/venues/{}/'.format(venue_id)
-                r = requests.get(url,headers = {"Authorization": "Bearer {}".format(token)},verify = True)
-                data = json.loads(r.text)
-                venue = {
-                    'name': data.get('name'),
-                    'address': '{}, {}'.format(data.get('address').get('address_1'),data.get('address').get('address_2')),
-                    'city': data.get('address').get('city'),
-                    'state': data.get('address').get('state'),
-                    'zip': data.get('address').get('postal_code'),
-                    'country': data.get('address').get('country'),
-                    'lat': data.get('address').get('latitude'),
-                    'lon': data.get('address').get('longitude')
-                }
-                venues[venue_id] = venue
-            group_name = [i['title'] for i in meeting_list if i['field_events_api_key'] == group_id][0]
-            for event in events_list:
-                event_dict = {
-                    'event_name': event.get('name').get('text'),
-                    'group_name': group_name,
-                    'venue': venues[event.get('venue_id')],
-                    'url': event.get('url'),
-                    'time': event.get('start').get("utc"),
-                    'rsvp_count': None,
-                    'created_at': event.get('created'),
-                    'description': event.get('description').get('text'),
-                    'data_as_of': datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
-                }
-                events.append(event_dict)
+            events += events_list
+    return events
+
+# Takes list of events hosted on EventBrite and returns list of unique venues.
+def get_eventbrite_venues(events_list):
+    venue_ids = []
+    token = config.get('eventbrite','token')
+    for event in events_list:
+        venue_ids.append(event['venue_id'])
+    venue_ids = list(set(venue_ids))
+    venues=[]
+    for venue_id in venue_ids:
+        url = 'https://www.eventbriteapi.com/v3/venues/{}/'.format(venue_id)
+        r = requests.get(url,headers = {"Authorization": "Bearer {}".format(token)},verify = True)
+        if r.status_code != 200:
+            raise Exception('Could not connect to Eventbrite API at {}.  Status Code: {}'.format(url, r.status_code))
+        data = json.loads(r.text)
+        venues.append(data)
+    return venues
+
+#Takes list of events hosted on EventBrite, list of venues, and list of all groups and returns formatted list of events
+def format_eventbrite_events(events_list, venues_list, group_list):
+    venues = {}
+    events = []
+    for venue in venues_list:
+        venue_id = venue.get('id')
+        venue_dict = {
+            'name': venue.get('name'),
+            'address': '{}, {}'.format(venue.get('address').get('address_1'),venue.get('address').get('address_2')),
+            'city': venue.get('address').get('city'),
+            'state': venue.get('address').get('state'),
+            'zip': venue.get('address').get('postal_code'),
+            'country': venue.get('address').get('country'),
+            'lat': venue.get('address').get('latitude'),
+            'lon': venue.get('address').get('longitude')
+        }
+        venues[venue_id] = venue
+    for event in events_list:
+        group_name = [i['title'] for i in group_list if i['field_events_api_key'] == event.get('organizer_id')][0]
+        event_dict = {
+            'event_name': event.get('name').get('text'),
+            'group_name': group_name,
+            'venue': venues[event.get('venue_id')],
+            'url': event.get('url'),
+            'time': event.get('start').get("utc"),
+            'rsvp_count': None,
+            'created_at': event.get('created'),
+            'description': event.get('description').get('text'),
+            'data_as_of': datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+        }
+        events.append(event_dict)
     return events
 
 
