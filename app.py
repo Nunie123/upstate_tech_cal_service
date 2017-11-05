@@ -24,20 +24,6 @@ config.read(config_file)
 app = Flask(__name__)
 app.config['SECRET_KEY'] = config.get('flask','Secret_key')
 
-# Gets list of groups, concatenates meeting lists for all groups, then saves json locally.
-def refresh_all_meetings():
-    group_lists = get_group_lists()
-    meetup_events = get_meetup_events(group_lists['Meetup'])
-    eventbrite_events = get_eventbrite_events(group_lists['Eventbrite'])
-    eventbrite_venues = get_eventbrite_venues(eventbrite_events)
-    events = (
-        format_meetup_events(meetup_events)
-        + format_eventbrite_events(events_list=eventbrite_events, venues_list=eventbrite_venues, group_list=group_lists['Eventbrite'])
-        )
-    with open('all_meetings.json', 'w') as outfile:
-        json.dump(events, outfile)
-    return events
-
 
 # Queries openupstate API for list of groups. Returns dictionary with each source as key (e.g. 'Meetup', 'Eventbrite')
 def get_group_lists():
