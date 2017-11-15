@@ -11,6 +11,6 @@ file_location = config.get('aws', 'update_cal_location')
 
 cron = CronTab(user=aws_username)
 job = cron.new(command='python {}'.format(file_location))
-job.minute.every(1)
+job.minute.every(5)
 
 cron.write()
