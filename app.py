@@ -154,7 +154,7 @@ def format_eventbrite_events(events_list, venues_list, group_list):
 
 
 
-@app.route('/', methods=['GET'])
+@app.route('/api/gtc', methods=['GET'])
 def get_dates():
     with open('all_meetings.json') as json_data:
         return jsonify(json.load(json_data))
