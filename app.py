@@ -55,16 +55,17 @@ def get_meetup_events(group_list):
 def format_meetup_events(events_raw):
     events=[]
     for event in events_raw:
-        if event.get('venue'):
+        venue_dict = event.get('venue')
+        if venue_dict:
             venue = {
-                'name': event.get('venue').get('name'),
-                'address': event.get('venue').get('address_1'),
-                'city': event.get('venue').get('city'),
-                'state': event.get('venue').get('state'),
-                'zip': event.get('venue').get('zip'),
-                'country': event.get('venue').get('country'),
-                'lat': event.get('venue').get('lat'),
-                'lon': event.get('venue').get('lon')
+                'name': venue_dict.get('name'),
+                'address': venue_dict.get('address_1'),
+                'city': venue_dict.get('city'),
+                'state': venue_dict.get('state'),
+                'zip': venue_dict.get('zip'),
+                'country': venue_dict.get('country'),
+                'lat': venue_dict.get('lat'),
+                'lon': venue_dict.get('lon')
             }
         else: venue = None
         if event.get('description'):
@@ -124,17 +125,19 @@ def format_eventbrite_events(events_list, venues_list, group_list):
     events = []
     for venue in venues_list:
         venue_id = venue.get('id')
-        venue_dict = {
-            'name': venue.get('name'),
-            'address': '{}, {}'.format(venue.get('address').get('address_1'),venue.get('address').get('address_2')),
-            'city': venue.get('address').get('city'),
-            'state': venue.get('address').get('state'),
-            'zip': venue.get('address').get('postal_code'),
-            'country': venue.get('address').get('country'),
-            'lat': venue.get('address').get('latitude'),
-            'lon': venue.get('address').get('longitude')
-        }
-        venues[venue_id] = venue
+        venue_address = venue.get('address')
+        if venue_address:
+            venue_dict = {
+                'name': venue.get('name'),
+                'address': '{}, {}'.format(venue_address.get('address_1'),venue_address.get('address_2')),
+                'city': venue_address.get('city'),
+                'state': venue_address.get('state'),
+                'zip': venue_address.get('postal_code'),
+                'country': venue_address.get('country'),
+                'lat': venue_address.get('latitude'),
+                'lon': venue_address.get('longitude')
+            }
+        venues[venue_id] = venue_dict
     for event in events_list:
         group_name = [i['title'] for i in group_list if i['field_events_api_key'] == event.get('organizer_id')][0]
         event_dict = {

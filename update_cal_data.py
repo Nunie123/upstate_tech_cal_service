@@ -1,4 +1,5 @@
 #!/home/ubuntu/miniconda2/envs/cal_service/bin/python
+# encoding: utf-8
 import app
 import simplejson as json
 
