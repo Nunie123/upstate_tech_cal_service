@@ -7,10 +7,11 @@ or eventbrite.com.  To be added added or provide updates to this list, make a co
 
 Meeting hosts currently not supported: Facebook, Nvite, Open Collective, and custom websites.
 
-The exposed JSON includes past and future meetings, as made available by the associated event hosting website APIs.  The data is somewhat large (500+
-  KB), and the endpoint does not currently provide any method for filtering the data returned.
+The exposed JSON includes past and future meetings, but defaults to providing only future meetings unless a `start_date` is specified. The data comes from the associated event hosting website APIs and is updated every five minutes.
 
-This application saves the data locally and then exposes the locally saved file.  This prevents excessive API calls to the event hosting websites and improves performance.  Once deployed to a public site, the intention is to have the data updated by a cron job on an hourly basis.
+You can access this data by going here: http://nunes.online/api/gtc
+
+You may also filter the return result by providing a `start_date` and `end_date` like so: http://nunes.online/api/gtc?start_date=2018-01-01&end_date=2018-02-01 (the application currently assumes "US/Eastern" as the timezone when a date filter is provided)
 
 The format of the JSON that returns is:
 

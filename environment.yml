@@ -6,3 +6,4 @@ dependencies:
     - simplejson==3.11.1
     - requests==2.18.4
     - python-crontab==2.2.6
+    - pytz==2017.3

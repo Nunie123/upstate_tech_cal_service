@@ -6,11 +6,13 @@ Meeting hosts currently not supported: Facebook, Nvite, Open Collective, and cus
 '''
 
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 import simplejson as json
 from configparser import ConfigParser
 import requests
 import datetime
+import pytz
+from dateutil.parser import parse
 
 
 
@@ -155,12 +157,49 @@ def format_eventbrite_events(events_list, venues_list, group_list):
     return events
 
 
+def parse_date(d):
+    if isinstance(d, datetime.datetime):
+        parsed_date = d
+    elif isinstance(d, str):
+        try:
+            eastern = pytz.timezone('US/Eastern')
+            date_no_tz = parse(d)
+            parsed_date = eastern.localize(date_no_tz, is_dst=None)
+        except:
+            return 'Start date {} is in unknown format. '.format(d)
+    else:
+        return 'Start date {} is in unknown format. '.format(d)
+    return parsed_date
 
 
-@app.route('/api/gtc', methods=['GET'])
+#Takes list of events and returns list of events occuring in specified date range
+def filter_events_by_date(events, start_date_str=datetime.datetime.now(datetime.timezone.utc), end_date_str=None):
+    start_date = parse_date(start_date_str) if start_date_str else None
+    end_date = parse_date(end_date_str) if end_date_str else None
+
+    if isinstance(start_date, str) or isinstance(end_date, str):
+        return '{}{}'.format(start_date, end_date).replace('None', '')
+
+    if start_date and end_date:
+        return [event for event in events if parse(event['time']) >= start_date and parse(event['time']) <= end_date]
+    elif start_date:
+        print('this: {} vs. this: {}'.format(parse(events[0]['time']), start_date))
+        return [event for event in events if parse(event['time']) >= start_date]
+    elif end_date:
+        return [event for event in events if parse(event['time']) <= end_date]
+    else: return events
+
+
+
+
+@app.route('/api/gtc', methods=['GET', 'POST'])
 def get_dates():
+    start_date = request.args.get('start_date', datetime.datetime.now(datetime.timezone.utc))
+    end_date = request.args.get('end_date', None)
     with open('all_meetings.json') as json_data:
-        return jsonify(json.load(json_data))
+        events_json = json.load(json_data)
+        events = filter_events_by_date(start_date_str=start_date, end_date_str=end_date, events=events_json)
+        return jsonify(events)
 
 
 if __name__ == '__main__':
