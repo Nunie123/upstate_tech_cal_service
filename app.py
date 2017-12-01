@@ -7,7 +7,7 @@ Meeting hosts currently not supported: Facebook, Nvite, Open Collective, and cus
 
 
 from flask import Flask, jsonify, request
-from flask-cors import CORS
+from flask_cors import CORS
 import simplejson as json
 from configparser import ConfigParser
 import requests
