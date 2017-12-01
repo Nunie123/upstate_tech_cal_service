@@ -7,3 +7,4 @@ dependencies:
     - requests==2.18.4
     - python-crontab==2.2.6
     - pytz==2017.3
+    - flask-cors==3.0.3

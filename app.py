@@ -7,6 +7,7 @@ Meeting hosts currently not supported: Facebook, Nvite, Open Collective, and cus
 
 
 from flask import Flask, jsonify, request
+from flask-cors import CORS
 import simplejson as json
 from configparser import ConfigParser
 import requests
@@ -24,6 +25,7 @@ config.read(config_file)
 
 # instantiate flask app
 app = Flask(__name__)
+CORS(app)
 app.config['SECRET_KEY'] = config.get('flask','Secret_key')
 
 
