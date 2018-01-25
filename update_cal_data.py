@@ -12,7 +12,7 @@ def refresh_all_meetings():
     eventbrite_events = app.get_eventbrite_events(group_lists['Eventbrite'])
     eventbrite_venues = app.get_eventbrite_venues(eventbrite_events)
     events = (
-        app.format_meetup_events(meetup_events)
+        app.format_meetup_events(meetup_events, group_lists['Meetup'])
         + app.format_eventbrite_events(events_list=eventbrite_events, venues_list=eventbrite_venues, group_list=group_lists['Eventbrite'])
         )
     with open('all_meetings.json', 'w') as outfile:

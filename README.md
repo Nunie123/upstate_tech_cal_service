@@ -11,29 +11,32 @@ The exposed JSON includes past and future meetings, but defaults to providing on
 
 You can access this data by going here: http://nunes.online/api/gtc
 
+You may filter by any tags applied to the organization on the openupstate.org api.  Currently the openupstate.org api only provides Tag IDs (i.e. an integer) instead of descriptive tags. (e.g. http://nunes.online/api/gtc?tags=1)
+
 You may also filter the return result by providing a `start_date` and `end_date` like so: http://nunes.online/api/gtc?start_date=2018-01-01&end_date=2018-02-01 (the application currently assumes "US/Eastern" as the timezone when a date filter is provided)
 
 The format of the JSON that returns is:
 
 
     [{
-      'event_name': 'Tuesday Hack Night',
-      'group_name': 'Upstate Hackers',
-      'venue': {'name': 'Greenville Open Data HQ',
-                'address': '101 N. Main St., 3rd Floor',
-                'city': 'Greenville',
-                'state': 'SC',
-                'zip': '29605',
-                'country': 'US',
-                'lat': 34.851616,
-                'lon': -82.398392}
-      'url': 'https://data.openupstate.org/',
-      'time': '2017-12-24T15:30:00Z',
-      'rsvp_count': 42,
-      'created_at': '2017-07-04T10:05:00Z',
-      'description': 'Let's meet up and hack everything!',
-      'data_as_of': '2017-10-29T18:29:14Z'
-    }, ...]`
+      "event_name": "Tuesday Hack Night",
+      "group_name": "Upstate Hackers",
+      "venue": {"name": "Greenville Open Data HQ",
+                "address": "101 N. Main St., 3rd Floor",
+                "city": "Greenville",
+                "state": "SC",
+                "zip": "29605",
+                "country": "US",
+                "lat": 34.851616,
+                "lon": -82.398392}
+      "url": "https://data.openupstate.org/",
+      "time": "2017-12-24T15:30:00Z",
+      "tags": "1"
+      "rsvp_count": 42,
+      "created_at": "2017-07-04T10:05:00Z",
+      "description": "Let"s meet up and hack everything!",
+      "data_as_of": "2017-10-29T18:29:14Z"
+    }, ...]
 
 Note:
 * All timestamps are in UTC.  

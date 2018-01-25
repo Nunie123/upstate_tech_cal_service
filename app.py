@@ -26,7 +26,7 @@ config.read(config_file)
 # instantiate flask app
 app = Flask(__name__)
 CORS(app)
-app.config['SECRET_KEY'] = config.get('flask','Secret_key')
+app.config['SECRET_KEY'] = config.get('flask','secret_key')
 
 
 # Queries openupstate API for list of groups. Returns dictionary with each source as key (e.g. 'Meetup', 'Eventbrite')
@@ -56,10 +56,11 @@ def get_meetup_events(group_list):
     return data['results']
 
 # Takes list of events from Meetup and returns formatted list of events
-def format_meetup_events(events_raw):
+def format_meetup_events(events_raw, group_list):
     events=[]
     for event in events_raw:
         venue_dict = event.get('venue')
+        tags = [i.get('field_org_tags') for i in group_list if i.get('field_events_api_key') == str(event['group']['id'])][0]
         if venue_dict:
             venue = {
                 'name': venue_dict.get('name'),
@@ -82,6 +83,7 @@ def format_meetup_events(events_raw):
             'url': event.get('event_url'),
     #note: time is converted from unix timestamp to ISO 8601 timestamp.  This currently works when both the meeting time and local computer time are in same timezone (US/Eastern).  Unsure if it will work when they are in different timezones.
             'time': datetime.datetime.utcfromtimestamp(int(event.get('time'))/1000).strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'tags': tags,
             'rsvp_count': event.get('yes_rsvp_count'),
             'created_at': datetime.datetime.utcfromtimestamp(int(event.get('created'))/1000).strftime('%Y-%m-%dT%H:%M:%SZ'),
             'description': description,
@@ -144,12 +146,14 @@ def format_eventbrite_events(events_list, venues_list, group_list):
         venues[venue_id] = venue_dict
     for event in events_list:
         group_name = [i['title'] for i in group_list if i['field_events_api_key'] == event.get('organizer_id')][0]
+        tags = [i['field_org_tags'] for i in group_list if i['field_events_api_key'] == event.get('organizer_id')][0]
         event_dict = {
             'event_name': event.get('name').get('text'),
             'group_name': group_name,
             'venue': venues[event.get('venue_id')],
             'url': event.get('url'),
             'time': event.get('start').get("utc"),
+            'tags': tags,
             'rsvp_count': None,
             'created_at': event.get('created'),
             'description': event.get('description').get('text'),
@@ -185,22 +189,36 @@ def filter_events_by_date(events, start_date_str=datetime.datetime.now(datetime.
     if start_date and end_date:
         return [event for event in events if parse(event['time']) >= start_date and parse(event['time']) <= end_date]
     elif start_date:
-        print('this: {} vs. this: {}'.format(parse(events[0]['time']), start_date))
+        #print('this: {} vs. this: {}'.format(parse(events[0]['time']), start_date))
         return [event for event in events if parse(event['time']) >= start_date]
     elif end_date:
         return [event for event in events if parse(event['time']) <= end_date]
     else: return events
 
-
+#Takes list of events and string of tags to return list of events with specified tags
+def filter_events_by_tag(events, tags):
+    if tags:
+        tags_list = tags.replace(' ', '').split(',')
+        print(tags_list)
+        filtered_events = []
+        for tag in tags_list:
+            filtered_events += [event for event in events if tag in event['tags']]
+        print(filtered_events)
+        return filtered_events
+    else:
+        return events
 
 
 @app.route('/api/gtc', methods=['GET', 'POST'])
 def get_dates():
+    print(request.args)
     start_date = request.args.get('start_date', datetime.datetime.now(datetime.timezone.utc))
     end_date = request.args.get('end_date', None)
+    tags = request.args.get('tags', None)
     with open('all_meetings.json') as json_data:
         events_json = json.load(json_data)
-        events = filter_events_by_date(start_date_str=start_date, end_date_str=end_date, events=events_json)
+        events_date_filter = filter_events_by_date(start_date_str=start_date, end_date_str=end_date, events=events_json)
+        events = filter_events_by_tag(events_date_filter, tags)
         return jsonify(events)
 
 
