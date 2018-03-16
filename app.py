@@ -16,8 +16,6 @@ import pytz
 from dateutil.parser import parse
 
 
-
-
 # import config file to global object
 config = ConfigParser()
 config_file = 'config.ini'
@@ -37,7 +35,7 @@ def get_group_lists():
         raise Exception('Could not connect to OpenUpstate API at {}.  Status Code: {}'.format(url, r.status_code))
     data = json.loads(r.text)    # current meeting sources: '', 'Facebook', 'Nvite', 'Eventbrite', 'Meetup', 'Unknown', 'Open Collective'
     all_sources = [x["field_event_service"] for x in data]
-    all_sources = list(set(all_sources))    #removes duplicates
+    all_sources = list(set(all_sources))    # removes duplicates
     groups_by_source = {}
     for source in all_sources:
         groups_by_source[source] = [i for i in data if i['field_event_service'] == source]
@@ -54,6 +52,7 @@ def get_meetup_events(group_list):
         raise Exception('Could not connect to Meetup API at {}.  Status Code: {}'.format(url, r.status_code))
     data = json.loads(r.text)
     return data['results']
+
 
 # Takes list of events from Meetup and returns formatted list of events
 def format_meetup_events(events_raw, group_list):
@@ -81,16 +80,20 @@ def format_meetup_events(events_raw, group_list):
             'group_name': event.get('group').get('name'),
             'venue': venue,
             'url': event.get('event_url'),
-    #note: time is converted from unix timestamp to ISO 8601 timestamp.  This currently works when both the meeting time and local computer time are in same timezone (US/Eastern).  Unsure if it will work when they are in different timezones.
+            # note: time is converted from unix timestamp to ISO 8601 timestamp.
+            # This currently works when both the meeting time and local computer time are in same timezone (US/Eastern).
+            # Unsure if it will work when they are in different timezones.
             'time': datetime.datetime.utcfromtimestamp(int(event.get('time'))/1000).strftime('%Y-%m-%dT%H:%M:%SZ'),
             'tags': tags,
             'rsvp_count': event.get('yes_rsvp_count'),
-            'created_at': datetime.datetime.utcfromtimestamp(int(event.get('created'))/1000).strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'created_at': datetime.datetime.utcfromtimestamp(int(event.get('created'))/1000)
+                                  .strftime('%Y-%m-%dT%H:%M:%SZ'),
             'description': description,
             'data_as_of': datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
         }
         events.append(event_dict)
     return events
+
 
 # Takes list of groups hosted on EventBrite and returns list of events.
 def get_eventbrite_events(group_list):
@@ -107,6 +110,7 @@ def get_eventbrite_events(group_list):
             events_list = data.get('events')
             events += events_list
     return events
+
 
 # Takes list of events hosted on EventBrite and returns list of unique venue dictionaries.
 def get_eventbrite_venues(events_list):
@@ -125,7 +129,8 @@ def get_eventbrite_venues(events_list):
         venues.append(data)
     return venues
 
-#Takes list of events hosted on EventBrite, list of venues, and list of all groups and returns formatted list of events
+
+# Takes list of events hosted on EventBrite, list of venues, and list of all groups and returns formatted list of events
 def format_eventbrite_events(events_list, venues_list, group_list):
     venues = {}
     events = []
@@ -178,9 +183,13 @@ def parse_date(d):
     return parsed_date
 
 
-#Takes list of events and returns list of events occuring in specified date range
+# Takes list of events and returns list of events occuring in specified date range
 def filter_events_by_date(events, start_date_str=datetime.datetime.now(datetime.timezone.utc), end_date_str=None):
-    start_date = parse_date(start_date_str) if start_date_str else None
+
+    if start_date_str:
+        start_date = parse_date(start_date_str) - datetime.timedelta(days=1)
+    else:
+        start_date = None
     end_date = parse_date(end_date_str) if end_date_str else None
 
     if isinstance(start_date, str) or isinstance(end_date, str):
@@ -195,7 +204,8 @@ def filter_events_by_date(events, start_date_str=datetime.datetime.now(datetime.
         return [event for event in events if parse(event['time']) <= end_date]
     else: return events
 
-#Takes list of events and string of tags to return list of events with specified tags
+
+# Takes list of events and string of tags to return list of events with specified tags
 def filter_events_by_tag(events, tags):
     if tags:
         tags_list = tags.replace(' ', '').split(',')
