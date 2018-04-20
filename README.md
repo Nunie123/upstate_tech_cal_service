@@ -1,11 +1,11 @@
-## Greenville Tech Calendar Service
+## Greenville Tech Meetup Events / Calendar API Service
 
+This application provides an endpoint to return event data for all [meetup groups](https://data.openupstate.org/organizations) listed in the [meetups API](https://github.com/codeforgreenville/OpenData/issues/17) if they host their meetings on [meetup.com](https://github.com/codeforgreenville/upstate_tech_cal_service/issues/2)
+or [eventbrite.com](https://github.com/codeforgreenville/upstate_tech_cal_service/issues/4).
 
-This application provides an endpoint that will return event data for all groups listed
-at https://data.openupstate.org/organizations that host their meeting information on meetup.com
-or eventbrite.com.  To be added added or provide updates to this list, make a comment on the github page here: https://github.com/codeforgreenville/OpenData/issues/18
+Meeting services currently not supported: [Facebook](https://github.com/codeforgreenville/upstate_tech_cal_service/issues/5), [Nvite](https://github.com/codeforgreenville/upstate_tech_cal_service/issues/6), [Open Collective](https://github.com/codeforgreenville/upstate_tech_cal_service/issues/2), and [custom websites](https://github.com/codeforgreenville/upstate_tech_cal_service/issues/7).
 
-Meeting hosts currently not supported: Facebook, Nvite, Open Collective, and custom websites.
+To be added or provided updates to this list, make a comment on [one of the issues](https://github.com/codeforgreenville/upstate_tech_cal_service/issues).
 
 The exposed JSON includes past and future meetings, but defaults to providing only future meetings unless a `start_date` is specified. The data comes from the associated event hosting website APIs and is updated every five minutes.
 
