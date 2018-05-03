@@ -21,7 +21,7 @@ app.config['SECRET_KEY'] = config.get('flask', 'secret_key')
 
 # Queries openupstate API for list of groups. Returns dictionary with each source as key (e.g. 'Meetup', 'Eventbrite')
 def get_group_lists():
-    url = 'https://data.openupstate.org/rest/organizations?org_status=active'
+    url = 'https://data.openupstate.org/rest/organizations?org_status=active&_format=json'
     r = requests.get(url)
     if r.status_code != 200:
         raise Exception('Could not connect to OpenUpstate API at {}.  Status Code: {}'.format(url, r.status_code))
