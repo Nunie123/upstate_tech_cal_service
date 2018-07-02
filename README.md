@@ -11,6 +11,13 @@ The exposed JSON includes past and future meetings, but defaults to providing on
 
 You can access this data by going here: http://nunes.online/api/gtc
 
+### Examples
+* [HackGreenville.com](https://hackgreenville.com/events)
+* [OpenWorks' Dashboard](https://joinopenworks.com/dashboard/meetups.php)
+* [Example Calendar](https://nunie123.github.io/gtc/)
+
+
+### Documentation
 You may filter by any tags applied to the organization on the openupstate.org api.  Currently the openupstate.org api only provides Tag IDs (i.e. an integer) instead of descriptive tags. (e.g. http://nunes.online/api/gtc?tags=1)
 
 You may also filter the return result by providing a `start_date` and `end_date` like so: http://nunes.online/api/gtc?start_date=2018-01-01&end_date=2018-02-01 (the application currently assumes "US/Eastern" as the timezone when a date filter is provided)
