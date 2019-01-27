@@ -12,7 +12,7 @@ import requests
 # instantiate flask app
 app = Flask(__name__)
 CORS(app)
-app.config['SECRET_KEY'] = os.environ('FLASK_KEY')
+app.config['SECRET_KEY'] = os.environ['FLASK_KEY']
 
 
 # Queries openupstate API for list of groups. Returns dictionary with each source as key (e.g. 'Meetup', 'Eventbrite')
@@ -34,7 +34,7 @@ def get_group_lists():
 def get_meetup_events(group_list):
     group_ids = [i['field_events_api_key'] for i in group_list]
     group_ids_str = ','.join(str(group_id) for group_id in group_ids)
-    api_key = os.environ('MEETUP_KEY')
+    api_key = os.environ['MEETUP_KEY']
     url = 'https://api.meetup.com/2/events?key={key}&group_id={ids}'.format(key=api_key, ids=group_ids_str)
     r = requests.get(url)
     if r.status_code != 200:
@@ -96,7 +96,7 @@ def format_meetup_events(events_raw, group_list):
 # Takes list of groups hosted on EventBrite and returns list of events.
 def get_eventbrite_events(group_list):
     group_ids = [i['field_events_api_key'] for i in group_list if i['field_events_api_key'] != '']
-    token = os.environ('EVENTBRITE_KEY')
+    token = os.environ['EVENTBRITE_KEY']
     events = []
     for group_id in group_ids:
         url = 'https://www.eventbriteapi.com/v3/organizers/{}/events/'.format(group_id)
@@ -113,7 +113,7 @@ def get_eventbrite_events(group_list):
 # Takes list of events hosted on EventBrite and returns list of unique venue dictionaries.
 def get_eventbrite_venues(events_list):
     venue_ids = []
-    token = os.environ('EVENTBRITE_KEY')
+    token = os.environ['EVENTBRITE_KEY']
     for event in events_list:
         venue_ids.append(event['venue_id'])
     venue_ids = list(set(venue_ids))
