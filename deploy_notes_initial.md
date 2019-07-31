@@ -9,4 +9,5 @@
   7. `export PATH="$HOME/miniconda/bin:$PATH"`
   8. `conda env create -f environment.yml`
   9. `source activate cal_service`
+  10. `pip install gunicorn`
 3. Create a config file as shown in config.ini.example
