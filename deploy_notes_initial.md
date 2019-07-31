@@ -1,7 +1,7 @@
 1. SSH into a Linux machine
 2. Execute the following commands:
-   1. `sudo useradd eventapi -s /bin/bash && passwd eventapi`
-   2. `sudo mkdir /home/eventapi/public_html && chown -Rf eventapi:eventapi /home/eventapi/public_html`
+   1. `sudo useradd usernamehere -s /bin/bash && passwd usernamehere`
+   2. `sudo mkdir /home/usernamehere/public_html && chown -Rf usernamehere:groupnamehere /home/usernamehere/public_html`
    3. `sudo update yum`
    4. `sudo yum install git`
    5. `git clone https://github.com/codeforgreenville/upstate_tech_cal_service.git`
