@@ -14,8 +14,8 @@
 3. Create a local config file, if one does not exist.
    1. `cp config.ini.example config.ini && nano config.ini`
    2. `nano config.ini`
-      1. Register your own Eventbrite token https://www.eventbrite.com/support/articles/en_US/How_To/how-to-locate-your-eventbrite-api-user-key?lg=en_US
-       2. Register your own a Meetup.com API key https://secure.meetup.com/meetup_api/key/
+      1. Register your own [Eventbrite token](https://www.eventbrite.com/support/articles/en_US/How_To/how-to-locate-your-eventbrite-api-user-key?lg=en_US)
+       2. Register your own a [Meetup.com API key](https://secure.meetup.com/meetup_api/key/)
        3. Flask secret can be any long random string
 4. Optionally - Test with gunicorn WSGI Server on a localhost port
    1. `gunicorn --bind 0.0.0.0:8000 app:app`
