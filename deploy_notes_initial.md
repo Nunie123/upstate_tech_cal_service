@@ -10,16 +10,19 @@
    8. `sh miniconda.sh -b -p $HOME/miniconda`
    9. `export PATH="$HOME/miniconda/bin:$PATH"`
    10. `conda env create -f environment.yml`
-   11. `source activate cal_service` OR `conda activate cal_service`
+   11. `conda activate cal_service` OR (old way) `source activate cal_service`
 3. Create a local config file, if one does not exist.
    1. `cp config.ini.example config.ini && nano config.ini`
    2. `nano config.ini`
       1. Register your own [Eventbrite token](https://www.eventbrite.com/support/articles/en_US/How_To/how-to-locate-your-eventbrite-api-user-key?lg=en_US)
        2. Register your own a [Meetup.com API key](https://secure.meetup.com/meetup_api/key/)
        3. Flask secret can be any long random string
-4. Optionally - Test with gunicorn WSGI Server on a localhost port
+4. On Production - Setup a cronjob to generate the all_meetings.json, for example, at :35 after every hour
+   1. `crontab -e -u usernamehere`
+   2. `35 * * * * source $HOME/.bashrc; cd ~/upstate_tech_cal_service && conda activate cal_service && python update_cal_data.py && conda deactivate`
+5. Optionally - Test with gunicorn WSGI Server on a localhost port
    1. `gunicorn --bind 0.0.0.0:8000 app:app`
    2. `wget http://localhost:8000`
-5. Optionally - Configure hosting via a Web Server 
+6. Optionally - Configure hosting via a Web Server 
    1. Setup gunicorn as a systemd daemon
    2. Configure an Nginx or Apache to "talk" to the gunicorn proxy
