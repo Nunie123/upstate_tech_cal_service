@@ -1,9 +1,10 @@
-1. SSH into a Linux machine
+1. Open a Linux Terminal / Shell, or SSH into a Linux machine
 2. Execute the following commands:
-   1. `sudo useradd usernamehere -s /bin/bash && passwd usernamehere`
-   2. `sudo mkdir /home/usernamehere/public_html && chown -Rf usernamehere:groupnamehere /home/usernamehere/public_html`
-   3. `sudo update yum`
-   4. `sudo yum install git`
+   1. If you're not installing on your localhost / computer then run these commmands, or the equivalent for your operating system
+      1. `sudo useradd usernamehere -s /bin/bash && passwd usernamehere`
+      2. `sudo mkdir /home/usernamehere/public_html && chown -Rf usernamehere:groupnamehere /home/usernamehere/public_html`
+      3. `sudo update yum`
+      4. `sudo yum install git`
    5. `git clone https://github.com/codeforgreenville/upstate_tech_cal_service.git`
    6. `cd upstate_tech_cal_service`
    7. `curl https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -o miniconda.sh`
@@ -17,12 +18,15 @@
       1. Register your own [Eventbrite token](https://www.eventbrite.com/support/articles/en_US/How_To/how-to-locate-your-eventbrite-api-user-key?lg=en_US)
        2. Register your own a [Meetup.com API key](https://secure.meetup.com/meetup_api/key/)
        3. Flask secret can be any long random string
+       4. Update your config.ini with the values from the previous steps
+5. Optionally - Test with gunicorn WSGI Server on a localhost port
+   1. Run the following to generate an up to date all_meetsups.json
+   2. cd ~/upstate_tech_cal_service && conda activate cal_service && python update_cal_data.py && conda deactivate
+   2. `gunicorn --bind 0.0.0.0:8000 app:app`
+   2. `wget http://localhost:8000/api/gtc?tags=1'`
 4. On Production - Setup a cronjob to generate the all_meetings.json, for example, at :35 after every hour
    1. `crontab -e -u usernamehere`
    2. `35 * * * * source $HOME/.bashrc; cd ~/upstate_tech_cal_service && conda activate cal_service && python update_cal_data.py && conda deactivate`
-5. Optionally - Test with gunicorn WSGI Server on a localhost port
-   1. `gunicorn --bind 0.0.0.0:8000 app:app`
-   2. `wget http://localhost:8000`
 6. Optionally - Configure hosting via a Web Server 
    1. Setup gunicorn as a systemd daemon
    2. Configure an Nginx or Apache to "talk" to the gunicorn proxy
