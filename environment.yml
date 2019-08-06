@@ -1,6 +1,8 @@
 name: cal_service
 dependencies:
   - python=3.6
+  - pip
+  - gunicorn
   - pip:
     - Flask==0.12.2
     - simplejson==3.11.1
