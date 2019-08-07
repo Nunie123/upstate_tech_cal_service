@@ -28,10 +28,10 @@
        2. Register your own a [Meetup.com API key](https://secure.meetup.com/meetup_api/key/)
        3. Flask secret can be any long random string
 5. Test with gunicorn WSGI Server on a localhost port
-   1. Run the following to generate an up to date all_meetsups.json
+   1. Run the following to generate / update the `all_meetsups.json` file in your application directory.
    2. cd ~/upstate_tech_cal_service && conda activate cal_service && python update_cal_data.py && conda deactivate
-   2. `gunicorn --bind 0.0.0.0:8000 app:app`
-   2. `wget http://localhost:8000/api/gtc?tags=1'`
+   2. Start a "localhost" web server: `gunicorn --bind 0.0.0.0:8000 app:app`
+   2. Visit the localhost application in your web browser, and see if it works: `http://localhost:8000/api/gtc?tags=1'`
 4. (Optional) On Remote or Production Servers - Setup a cronjob to generate the all_meetings.json, for example, at :35 after every hour
    1. `crontab -e -u usernamehere`
    2. `35 * * * * source $HOME/.bashrc; cd ~/upstate_tech_cal_service && conda activate cal_service && python update_cal_data.py && conda deactivate`
