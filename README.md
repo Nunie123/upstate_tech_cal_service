@@ -18,9 +18,12 @@ You can access this data by going here: https://events.openupstate.org/api/gtc
 
 ### Documentation
 
-More, [general notes are included in the issue from before the app was migrated](https://github.com/codeforgreenville/upstate_tech_cal_service/issues/14) off Heroku onto a dedicated server.
+#### Setup
+If you're new here, then initial setup of test or production environment with Python + Miniconda + Flask app can be found in the [deploy_notes_initial.md](https://github.com/codeforgreenville/upstate_tech_cal_service/blob/master/deploy_notes_initial.md)
 
-Initial setup of test or production environment with Python + Miniconda + Flask app can be found in the [deploy_notes_initial.md](https://github.com/codeforgreenville/upstate_tech_cal_service/blob/master/deploy_notes_initial.md)
+Other [general application notes are included in the issue from before the app was migrated](https://github.com/codeforgreenville/upstate_tech_cal_service/issues/14) off Heroku onto a dedicated server.
+
+#### Interacting with a Running Application
 
 You may filter by any tags applied to the organization on the openupstate.org api.  Currently the openupstate.org api only provides Tag IDs (i.e. an integer) instead of descriptive tags. (e.g. https://events.openupstate.org/api/gtc?tags=1)
 
