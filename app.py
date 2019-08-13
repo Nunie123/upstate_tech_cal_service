@@ -7,7 +7,6 @@ import datetime
 import pytz
 from dateutil.parser import parse
 
-
 # import config file to global object
 config = ConfigParser()
 config_file = 'config.ini'
@@ -17,7 +16,6 @@ config.read(config_file)
 app = Flask(__name__)
 CORS(app)
 app.config['SECRET_KEY'] = config.get('flask', 'secret_key')
-
 
 # Queries openupstate API for list of groups. Returns dictionary with each source as key (e.g. 'Meetup', 'Eventbrite')
 def get_group_lists():
@@ -39,7 +37,9 @@ def get_meetup_events(group_list):
     group_ids = [i['field_events_api_key'] for i in group_list]
     group_ids_str = ','.join(str(group_id) for group_id in group_ids)
     api_key = config.get('meetup', 'api_key')
-    url = 'https://api.meetup.com/2/events?key={key}&group_id={ids}'.format(key=api_key, ids=group_ids_str)
+    # find all upcoming OR cancelled, including "limited" visibility events, for all the group IDs for Meetup.com
+    url = 'https://api.meetup.com/2/events?key={key}&status=upcoming,cancelled&limited_events=true&group_id={ids}'.format(key=api_key, ids=group_ids_str)
+
     r = requests.get(url)
     if r.status_code != 200:
         raise Exception('Could not connect to Meetup API at {}.  Status Code: {}'.format(url, r.status_code))
@@ -51,6 +51,7 @@ def get_meetup_events(group_list):
 def format_meetup_events(events_raw, group_list):
     events = []
     for event in events_raw:
+
         venue_dict = event.get('venue')
         group_item = [i for i in group_list if i.get('field_events_api_key') == str(event['group']['id'])][0]
         tags = group_item.get('field_org_tags')
@@ -75,24 +76,29 @@ def format_meetup_events(events_raw, group_list):
         else:
             description = None
 
-        event_dict = {
-            'event_name': event.get('name'),
-            'group_name': event.get('group').get('name'),
-            'venue': venue,
-            'url': event.get('event_url'),
-            # note: time is converted from unix timestamp to ISO 8601 timestamp.
-            # This currently works when both the meeting time and local computer time are in same timezone (US/Eastern).
-            # Unsure if it will work when they are in different timezones.
-            'time': datetime.datetime.utcfromtimestamp(int(event.get('time'))/1000).strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'tags': tags,
-            'rsvp_count': event.get('yes_rsvp_count'),
-            'created_at': datetime.datetime.utcfromtimestamp(int(event.get('created'))/1000)
+        try:
+            event_dict = {
+                'event_name': event.get('name'),
+                'group_name': event.get('group').get('name'),
+                'venue': venue,
+                'url': event.get('event_url'),
+                # note: time is converted from unix timestamp to ISO 8601 timestamp.
+                # This currently works when both the meeting time and local computer time are in same timezone (US/Eastern).
+                # Unsure if it will work when they are in different timezones.
+                'time': datetime.datetime.utcfromtimestamp(int(event.get('time'))/1000).strftime('%Y-%m-%dT%H:%M:%SZ'),
+                'tags': tags,
+                'rsvp_count': event.get('yes_rsvp_count'),
+                'created_at': datetime.datetime.utcfromtimestamp(int(event.get('created'))/1000)
                                   .strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'description': description,
-            'uuid': uuid,
-            'nid': nid,
-            'data_as_of': datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
-        }
+                'description': description,
+                'uuid': uuid,
+                'nid': nid,
+                'data_as_of': datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                'status': event.get('status')
+            }
+        except TypeError:
+            pass
+
         events.append(event_dict)
     return events
 
@@ -125,8 +131,8 @@ def get_eventbrite_venues(events_list):
     for venue_id in venue_ids:
         url = 'https://www.eventbriteapi.com/v3/venues/{}/'.format(venue_id)
         r = requests.get(url, headers={"Authorization": "Bearer {}".format(token)}, verify=True)
-        if r.status_code != 200:
-            raise Exception('Could not connect to Eventbrite API at {}.  Status Code: {}'.format(url, r.status_code))
+        # if r.status_code != 200:
+            # raise Exception('Could not connect to Eventbrite API at {}.  Status Code: {}'.format(url, r.status_code))
         data = json.loads(r.text)
         venues.append(data)
     return venues
@@ -171,7 +177,8 @@ def format_eventbrite_events(events_list, venues_list, group_list):
             'description': event.get('description').get('text'),
             'uuid': uuid,
             'nid': nid,
-            'data_as_of': datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+            'data_as_of': datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'status': event.get('status')
         }
         events.append(event_dict)
     return events
