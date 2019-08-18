@@ -123,12 +123,13 @@ def get_eventbrite_venues(events_list):
     venue_ids = list(set(venue_ids))
     venues = []
     for venue_id in venue_ids:
-        url = 'https://www.eventbriteapi.com/v3/venues/{}/'.format(venue_id)
-        r = requests.get(url, headers={"Authorization": "Bearer {}".format(token)}, verify=True)
-        if r.status_code != 200:
-            raise Exception('Could not connect to Eventbrite API at {}.  Status Code: {}'.format(url, r.status_code))
-        data = json.loads(r.text)
-        venues.append(data)
+        if venue_id != None:  # Catch exception if venue id not properly supplied
+            url = 'https://www.eventbriteapi.com/v3/venues/{}/'.format(venue_id)
+            r = requests.get(url, headers={"Authorization": "Bearer {}".format(token)}, verify=True)
+            if r.status_code != 200:
+                raise Exception('Could not connect to Eventbrite API at {}.  Status Code: {}'.format(url, r.status_code))
+            data = json.loads(r.text)
+            venues.append(data)
     return venues
 
 
@@ -154,26 +155,27 @@ def format_eventbrite_events(events_list, venues_list, group_list):
         venues[venue_id] = venue_dict
 
     for event in events_list:
-        group_item = [i for i in group_list if i['field_events_api_key'] == event.get('organizer_id')][0]
-        group_name = group_item.get('title')
-        tags = group_item.get('field_org_tags')
-        uuid = group_item.get('uuid')
-        nid = group_item.get('nid')
-        event_dict = {
-            'event_name': event.get('name').get('text'),
-            'group_name': group_name,
-            'venue': venues[event.get('venue_id')],
-            'url': event.get('url'),
-            'time': event.get('start').get("utc"),
-            'tags': tags,
-            'rsvp_count': None,
-            'created_at': event.get('created'),
-            'description': event.get('description').get('text'),
-            'uuid': uuid,
-            'nid': nid,
-            'data_as_of': datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
-        }
-        events.append(event_dict)
+        if type(event.get('venue_id')) == str:  # If venue id error
+            group_item = [i for i in group_list if i['field_events_api_key'] == event.get('organizer_id')][0]
+            group_name = group_item.get('title')
+            tags = group_item.get('field_org_tags')
+            uuid = group_item.get('uuid')
+            nid = group_item.get('nid')
+            event_dict = {
+                'event_name': event.get('name').get('text'),
+                'group_name': group_name,
+                'venue': venues[event.get('venue_id')],
+                'url': event.get('url'),
+                'time': event.get('start').get("utc"),
+                'tags': tags,
+                'rsvp_count': None,
+                'created_at': event.get('created'),
+                'description': event.get('description').get('text'),
+                'uuid': uuid,
+                'nid': nid,
+                'data_as_of': datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+            }
+            events.append(event_dict)
     return events
 
 
