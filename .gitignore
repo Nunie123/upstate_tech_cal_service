@@ -7,3 +7,6 @@ config.ini
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 /all_meetings.json
+
+# Virtual Environment
+/venv
