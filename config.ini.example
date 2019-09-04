@@ -1,9 +1,6 @@
 [flask]
 secret_key = secret
 
-[meetup]
-api_key = abc123
-
 [eventbrite]
 token = ABC123
 

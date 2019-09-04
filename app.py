@@ -36,9 +36,9 @@ def get_group_lists():
 def get_meetup_events(group_list):
     group_ids = [i['field_events_api_key'] for i in group_list]
     group_ids_str = ','.join(str(group_id) for group_id in group_ids)
-    api_key = config.get('meetup', 'api_key')
+
     # find all upcoming OR cancelled, including "limited" visibility events, for all the group IDs for Meetup.com
-    url = 'https://api.meetup.com/2/events?key={key}&status=upcoming,cancelled&limited_events=true&group_id={ids}'.format(key=api_key, ids=group_ids_str)
+    url = 'https://api.meetup.com/2/events?status=upcoming,cancelled&limited_events=true&group_id={ids}'.format(ids=group_ids_str)
 
     r = requests.get(url)
     if r.status_code != 200:
