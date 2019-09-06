@@ -34,17 +34,32 @@ def get_group_lists():
 
 # Takes list of groups and makes API call to Meetup.com to get event details. Returns list.
 def get_meetup_events(group_list):
-    group_ids = [i['field_events_api_key'] for i in group_list]
-    group_ids_str = ','.join(str(group_id) for group_id in group_ids)
+    # Extract https:www.meetup.com/'groupName' from each item in group_list
+    group_urls = [i['field_event_calendar_homepage'] for i in group_list]
+    # Create empty list to be returned by the function
+    all_events = []
+    for url in group_urls:
+        url = url.replace('www', 'api')
+        # Urls are currently written as: https:www.meetup.com/'groupname', but random urls return as https:www.meetup.com/'groupname'/events.
+        # To avoid 404 errors, we need to strip the trailing 'events/', if it exists, before appending the api request url
+        if url.endswith('events/'):
+            url = url.rstrip('/')
+            url += "?&sign=true&photo-host=public&page=20"
+        else:
+            url += "events?&sign=true&photo-host=public&page=20"
+        r = requests.get(url)
+        if r.status_code != 200:
+            raise Exception('Could not connect to Meetup API at {}.  Status Code: {}'.format(url, r.status_code))
 
-    # find all upcoming OR cancelled, including "limited" visibility events, for all the group IDs for Meetup.com
-    url = 'https://api.meetup.com/2/events?status=upcoming,cancelled&limited_events=true&group_id={ids}'.format(ids=group_ids_str)
+        # Returns one JSON object for each Meetup group, with events nested in the single JSON object
+        data = json.loads(r.text)
 
-    r = requests.get(url)
-    if r.status_code != 200:
-        raise Exception('Could not connect to Meetup API at {}.  Status Code: {}'.format(url, r.status_code))
-    data = json.loads(r.text)
-    return data['results']
+        # Extract each event
+        for event in data:
+        # Append individual events to list
+            all_events.append(event)
+
+    return all_events
 
 
 # Takes list of events from Meetup and returns formatted list of events
