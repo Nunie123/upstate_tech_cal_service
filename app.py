@@ -255,6 +255,10 @@ def get_dates():
         events_json = json.load(json_data)
         events_date_filter = filter_events_by_date(start_date_str=start_date, end_date_str=end_date, events=events_json)
         events = filter_events_by_tag(events_date_filter, tags)
+
+        # Sort events by time
+        events.sort(key=lambda s: s['time'])
+
         return jsonify(events)
 
 
