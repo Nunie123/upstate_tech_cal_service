@@ -34,19 +34,13 @@ def get_group_lists():
 
 # Takes list of groups and makes API call to Meetup.com to get event details. Returns list.
 def get_meetup_events(group_list):
-    # Extract https:www.meetup.com/'groupName' from each item in group_list
-    group_urls = [i['field_event_calendar_homepage'] for i in group_list]
+    # Extract field_event_api_key from each item in group_list
+    group_apis = [i['field_events_api_key'] for i in group_list]
     # Create empty list to be returned by the function
     all_events = []
-    for url in group_urls:
-        url = url.replace('www', 'api')
-        # Urls are currently written as: https:www.meetup.com/'groupname', but random urls return as https:www.meetup.com/'groupname'/events.
-        # To avoid 404 errors, we need to strip the trailing 'events/', if it exists, before appending the api request url
-        if url.endswith('events/'):
-            url = url.rstrip('/')
-            url += "?&sign=true&photo-host=public&page=20"
-        else:
-            url += "events?&sign=true&photo-host=public&page=20"
+    for api in group_apis:
+        # Create url from group name found in Organization API's field_event_api_key
+        url = 'https://api.meetup.com/{}/events?&sign=true&photo-host=public&page=20'.format(api)
         r = requests.get(url)
         if r.status_code != 200:
             raise Exception('Could not connect to Meetup API at {}.  Status Code: {}'.format(url, r.status_code))
@@ -66,9 +60,8 @@ def get_meetup_events(group_list):
 def format_meetup_events(events_raw, group_list):
     events = []
     for event in events_raw:
-
         venue_dict = event.get('venue')
-        group_item = [i for i in group_list if i.get('field_events_api_key') == str(event['group']['id'])][0]
+        group_item = [i for i in group_list if i.get('field_events_api_key') == str(event['group']['urlname'])][0]
         tags = group_item.get('field_org_tags')
         uuid = group_item.get('uuid')
         nid = group_item.get('nid')
@@ -262,6 +255,10 @@ def get_dates():
         events_json = json.load(json_data)
         events_date_filter = filter_events_by_date(start_date_str=start_date, end_date_str=end_date, events=events_json)
         events = filter_events_by_tag(events_date_filter, tags)
+
+        # Sort events by time
+        events.sort(key=lambda s: s['time'])
+
         return jsonify(events)
 
 
