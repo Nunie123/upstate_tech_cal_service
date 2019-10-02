@@ -36,7 +36,7 @@
    1. `crontab -e -u usernamehere`
    2. `35 * * * * source $HOME/.bashrc; cd ~/upstate_tech_cal_service && conda activate cal_service && python update_cal_data.py && conda deactivate`
 6. (Optional) Configure hosting via a real Web Server, like Apache or Nginx
-   1. Setup gunicorn as a systemd daemon
+   1. Setup gunicorn as a systemd daemon. **Change "apache" to "nginx" in this file if you're using Nginx.**
       1. `sudo nano /etc/systemd/system/gunicorn.service`
       1. ~~~
          [Unit]
@@ -55,6 +55,8 @@
          ~~~
       1. Save and reload the new systemd daemon "unit file" using `sudo systemctl daemon-reload`
       1. To make any future edits to the gunicorn systemd unit file, use `systemctl edit --full gunicorn.service` and be sure to reload using `sudo systemctl daemon-reload`
+      1. Start the Gunicorn systemd daemon using `systemctl restart gunicorn`
+      1. Verify it's running by using `systemctl status gunicorn` and check that /var/run/cal_service.sock exists. You can also use a tool like `htop` to see there are 3 active/worker gunicorn threads
    2. Configure an Nginx or Apache to "talk" to the gunicorn via the respective "proxy" directive(s)
       1. Apache Example
          ~~~
