@@ -37,4 +37,74 @@
    2. `35 * * * * source $HOME/.bashrc; cd ~/upstate_tech_cal_service && conda activate cal_service && python update_cal_data.py && conda deactivate`
 6. (Optional) Configure hosting via a real Web Server, like Apache or Nginx
    1. Setup gunicorn as a systemd daemon
+      1. `sudo nano /etc/systemd/system/gunicorn.service`
+      1. ~~~
+         [Unit]
+         Description=Gunicorn instance to serve cal_service
+         After=network.target
+
+         [Service]
+         User=root
+         Group=apache
+         WorkingDirectory=/home/eventapi/upstate_tech_cal_service
+         Environment="PATH=/home/eventapi/miniconda/envs/cal_service/bin"
+         ExecStart=/home/eventapi/miniconda/envs/cal_service/bin/gunicorn --workers 3 --log-file /var/log/gunicorn.log --log-level error --bind unix:/var/run/cal_service.sock -m 007 app:app
+
+         [Install]
+         WantedBy=multi-user.target
+         ~~~
+      1. Save and reload the new systemd daemon "unit file" using `sudo systemctl daemon-reload`
+      1. To make any future edits to the gunicorn systemd unit file, use `systemctl edit --full gunicorn.service` and be sure to reload using `sudo systemctl daemon-reload`
    2. Configure an Nginx or Apache to "talk" to the gunicorn via the respective "proxy" directive(s)
+      1. Apache Example
+         ~~~
+         <VirtualHost *:443>
+
+         UseCanonicalName On
+
+          ServerName events.openupstate.org
+
+          DocumentRoot /home/eventapi/public_html
+          DirectoryIndex index.html
+          ErrorLog /var/log/httpd/events.openupstate.org_error_log
+          CustomLog /var/log/httpd/events.openupstate.org_access_log combined
+
+          ProxyPass /api/ unix:/var/run/cal_service.sock|http://events.openupstate.org/api/
+
+          <Directory /home/eventapi/public_html>
+             Options -Indexes +IncludesNOEXEC +SymLinksifOwnerMatch +ExecCGI
+             allow from all
+
+             AllowOverride None
+             Include /home/eventapi/public_html/.htaccess
+          </Directory>
+
+          # HSTS to force browsers to always ask for https
+          Header always set Strict-Transport-Security "max-age=31536000;"
+
+          SSLCertificateFile /etc/letsencrypt/live/events.openupstate.org/fullchain.pem
+          SSLCertificateKeyFile /etc/letsencrypt/live/events.openupstate.org/privkey.pem
+          Include /etc/letsencrypt/options-ssl-apache.conf
+         </VirtualHost>
+         ~~~
+      2. Nginx Virtual Host Example - [modified from Boban, and not tested](https://serverfault.com/q/892944)
+         ~~~
+         server {
+             server_tokens off;
+             listen      443 ssl;
+             server_name         events.openupstate.org;
+
+             ssl_certificate     /etc/letsencrypt/live/events.openupstate.org/fullchain.pem;
+             ssl_certificate_key /etc/letsencrypt/live/events.openupstate.org/privkey.pem;
+
+             access_log      /var/log/nginx/access.myserver.log;
+             error_log       /var/log/nginx/error.myserver.log;
+
+             location /api {
+                 include proxy_params;
+                 proxy_pass http://unix:/var/run/cal_service.sock;
+             }
+         }
+         ~~~
+   1. Create a Gunicorn log file for the web server and the web server user may need permissions to write to it, `sudo touch /var/log/gunicorn.log && chown apache:apache /var/log/gunicorn.log && chmod g+w /var/log/gunicorn.log`
+
