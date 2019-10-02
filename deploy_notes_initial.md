@@ -110,3 +110,14 @@
          ~~~
    1. Create a Gunicorn log file for the web server and the web server user may need permissions to write to it, `sudo touch /var/log/gunicorn.log && chown apache:apache /var/log/gunicorn.log && chmod g+w /var/log/gunicorn.log`
 
+
+Kudos To
+https://djangodeployment.com/2016/11/30/how-to-setup-apache-with-gunicorn/
+https://github.com/nrk/predis/issues/277
+https://axilleas.me/en/blog/2013/selinux-policy-for-nginx-and-gitlab-unix-socket-in-fedora-19/
+https://stackoverflow.com/q/36527427
+http://vicch.github.io/pkb/programming/book/servers_for_hackers.html
+http://dev.prodigi.us/post/python-gunicorn-apache-simple-and-performant-method-deploy-your-django-projects/
+https://www.vioan.eu/blog/2016/10/10/deploy-your-flask-python-app-on-ubuntu-with-apache-gunicorn-and-systemd/
+https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-centos-7
+https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-ubuntu-16-04
