@@ -23,10 +23,10 @@
       1. Or, the older way will work too: `source activate cal_service`
 3. Create a local config.ini file, if one does not exist.
    1. `cp config.ini.example config.ini && nano config.ini`
-   1. Fill in the placeholders, "ABC123", values in your config.ini with the real values for the following, `nano config.ini`
+   1. Fill in the placeholder values in your config.ini with the real values for the following, `nano config.ini`
       1. Register your own [Eventbrite token](https://www.eventbrite.com/support/articles/en_US/How_To/how-to-locate-your-eventbrite-api-user-key?lg=en_US)
-       2. Register your own a [Meetup.com API key](https://secure.meetup.com/meetup_api/key/)
-       3. Flask secret can be any long random string
+       1. Flask secret can be any long random string
+       1. (Optionsal) Version 3 of the Meetup.com API requires an Oauth Key. However, as of Oct 2019, we're using only public GET API endpoints that require not authentication. It's not necessary to register a Meetup.com API key unless/until the app needs access to an authenticated endpoint, at which point the key could be added to the config file
 5. Test with gunicorn WSGI Server on a localhost port
    1. Run the following to generate / update the `all_meetsups.json` file in your application directory.
    2. cd ~/upstate_tech_cal_service && conda activate cal_service && python update_cal_data.py && conda deactivate
