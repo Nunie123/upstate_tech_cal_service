@@ -31,26 +31,21 @@ You may also filter the return result by providing a `start_date` and `end_date`
 
 The format of the JSON that returns is:
 
-
     [{
-      "event_name": "Tuesday Hack Night",
-      "group_name": "Upstate Hackers",
-      "venue": {"name": "Greenville Open Data HQ",
-                "address": "101 N. Main St., 3rd Floor",
-                "city": "Greenville",
-                "state": "SC",
-                "zip": "29605",
-                "country": "US",
-                "lat": 34.851616,
-                "lon": -82.398392}
-      "url": "https://data.openupstate.org/",
-      "time": "2017-12-24T15:30:00Z",
-      "tags": "1"
-      "rsvp_count": 42,
-      "created_at": "2017-07-04T10:05:00Z",
-      "description": "Let"s meet up and hack everything!",
-      "data_as_of": "2017-10-29T18:29:14Z"
-    }, ...]
+    "created_at": "2019-03-05T13:44:52Z", 
+    "data_as_of": "2019-10-02T03:35:21Z", 
+    "description": "Bring your laptop and join us for our monthly Hack Night - drop-ins welcome! You are invited to work on any coding project you have, learn to code while enjoying a hacking atmosphere and network with other women developers. You will have the opportunity to announce your project or ask for help and mingle with other women in tech. If you're just starting off with coding, come, and we'll help you choose tutorials and learn further. Some of our members are working on freeCodeCamp (<a href=\"https://www.freecodecamp.com/\" class=\"linkified\">https://www.freecodecamp.com/</a>). Just checking out what everyone else is doing is OK, too! If you have skills to share, please come to help mentor and answer questions. THANKS to our host OpenWorks (<a href=\"https://joinopenworks.com/\" class=\"linkified\">https://joinopenworks.com/</a>)! Schedule: 6:00pm Arrive/Network/Food<br/>6:30pm Welcome &amp; Announcements<br/>6:45pm Freestyle Hack Night ", 
+    "event_name": "WWCode Hack Night", 
+    "group_name": "Women Who Code Greenville", 
+    "nid": "40", 
+    "rsvp_count": 10, 
+    "status": "upcoming", 
+    "tags": "1", 
+    "time": "2019-10-03T22:00:00Z", 
+    "url": null, 
+    "uuid": "788992ce-51f8-44e2-b300-d495303e0025", 
+    "venue": null
+    }]
 
 Note:
 * Kudos to @Nunie123 for the initial development
