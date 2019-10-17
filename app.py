@@ -188,7 +188,7 @@ def format_eventbrite_events(events_list, venues_list, group_list):
                 'uuid': uuid,
                 'nid': nid,
                 'data_as_of': datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-                'status': event.get('status')
+                'status': normalize_eventbrite_status_codes(event.get('status'))
             }
             events.append(event_dict)
     return events
@@ -243,6 +243,16 @@ def filter_events_by_tag(events, tags):
         return filtered_events
     else:
         return events
+
+def normalize_eventbrite_status_codes(status):
+    # takes current status from eventbrite, and matches it to meetup's vernacular
+    status_dict = {
+        'started': 'upcoming',
+        'completed': 'past',
+        'canceled': 'cancelled'
+    }
+
+    return status_dict.get(status)
 
 
 @app.route('/api/gtc', methods=['GET', 'POST'])
