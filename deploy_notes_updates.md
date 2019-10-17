@@ -6,6 +6,4 @@
 6. Reload daemon: `sudo systemctl daemon-reload`
 7. Restart gunicorn: `sudo systemctl restart gunicorn`
 8. Restart nginx: `sudo systemctl restart nginx`
-
-
-Helpful information here: https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-ubuntu-16-04
+9. Run the app, either manually `conda activate cal_service && python update_cal_data.py && conda deactivate`  or when the next cronjob runs
