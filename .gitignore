@@ -1,6 +1,9 @@
-config.ini
+logs/
+*.ini
 *.DS_Store
 *.pyc
+.vscode/settings.json
+*.sh
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
@@ -10,3 +13,4 @@ config.ini
 
 # Virtual Environment
 /venv
+mypy/*

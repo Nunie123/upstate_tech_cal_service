@@ -12,10 +12,16 @@ config = ConfigParser()
 config_file = 'config.ini'
 config.read(config_file)
 
+import logging
+from logging.config import fileConfig
+
 # instantiate flask app
 app = Flask(__name__)
 CORS(app)
 app.config['SECRET_KEY'] = config.get('flask', 'secret_key')
+
+fileConfig('logging_config.ini')
+logger = logging.getLogger()
 
 # Queries openupstate API for list of groups. Returns dictionary with each source as key (e.g. 'Meetup', 'Eventbrite')
 def get_group_lists():
@@ -89,7 +95,7 @@ def format_meetup_events(events_raw, group_list):
                 'event_name': event.get('name'),
                 'group_name': event.get('group').get('name'),
                 'venue': venue,
-                'url': event.get('event_url'),
+                'url': event.get('link'),
                 # note: time is converted from unix timestamp to ISO 8601 timestamp.
                 # This currently works when both the meeting time and local computer time are in same timezone (US/Eastern).
                 # Unsure if it will work when they are in different timezones.
@@ -188,7 +194,7 @@ def format_eventbrite_events(events_list, venues_list, group_list):
                 'uuid': uuid,
                 'nid': nid,
                 'data_as_of': datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-                'status': event.get('status')
+                'status': normalize_eventbrite_status_codes(event.get('status'))
             }
             events.append(event_dict)
     return events
@@ -235,19 +241,27 @@ def filter_events_by_date(events, start_date_str=datetime.datetime.now(datetime.
 def filter_events_by_tag(events, tags):
     if tags:
         tags_list = tags.replace(' ', '').split(',')
-        print(tags_list)
         filtered_events = []
         for tag in tags_list:
             filtered_events += [event for event in events if tag in event['tags']]
-        print(filtered_events)
         return filtered_events
     else:
         return events
 
+def normalize_eventbrite_status_codes(status):
+    # takes current status from eventbrite, and matches it to meetup's vernacular
+    status_dict = {
+        'started': 'upcoming',
+        'completed': 'past',
+        'canceled': 'cancelled'
+    }
+
+    return status_dict.get(status)
+
 
 @app.route('/api/gtc', methods=['GET', 'POST'])
 def get_dates():
-    print(request.args)
+
     start_date = request.args.get('start_date', datetime.datetime.now(datetime.timezone.utc))
     end_date = request.args.get('end_date', None)
     tags = request.args.get('tags', None)
@@ -263,4 +277,4 @@ def get_dates():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
