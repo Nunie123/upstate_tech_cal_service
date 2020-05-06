@@ -40,6 +40,7 @@ def get_group_lists():
 
 # Takes list of groups and makes API call to Meetup.com to get event details. Returns list.
 def get_meetup_events(group_list):
+
     # Extract field_event_api_key from each item in group_list
     group_apis = [i['field_events_api_key'] for i in group_list]
     # Create empty list to be returned by the function
@@ -47,6 +48,7 @@ def get_meetup_events(group_list):
     for api in group_apis:
         # Create url from group name found in Organization API's field_event_api_key
         url = 'https://api.meetup.com/{}/events?&sign=true&photo-host=public&page=20'.format(api)
+
         r = requests.get(url)
         if r.status_code != 200:
             raise Exception('Could not connect to Meetup API at {}.  Status Code: {}'.format(url, r.status_code))
@@ -120,17 +122,30 @@ def format_meetup_events(events_raw, group_list):
 # Takes list of groups hosted on EventBrite and returns list of events.
 def get_eventbrite_events(group_list):
     group_ids = [i['field_events_api_key'] for i in group_list if i['field_events_api_key'] != '']
+
     token = config.get('eventbrite', 'token')
     events = []
+
+    # the current date time in ISO8601 format
+    current_time = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+
     for group_id in group_ids:
-        url = 'https://www.eventbriteapi.com/v3/organizers/{}/events/'.format(group_id)
+ 
+        # Eventbrite paginates results with 50 per page. If we do not include a start date then organizers with over
+        # 50 results will only return the oldest results unless we use a continuation token to explicitly page
+        # sorting ascending on the start date will also help ensure the current events aren't lost on pagination if
+        # an organizer happens to have over 50 future events
+        url = 'https://www.eventbriteapi.com/v3/organizers/{}/events/?order_by=start_asc&start_date.range_start={}'.format(group_id, current_time)
+
         r = requests.get(url, headers={"Authorization": "Bearer {}".format(token)}, verify=True)
         if r.status_code != 200:
             raise Exception('Could not connect to Eventbrite API at {}.  Status Code: {}'.format(url, r.status_code))
         data = json.loads(r.text)
+
         if data.get('events'):
             events_list = data.get('events')
             events += events_list
+
     return events
 
 
@@ -150,11 +165,13 @@ def get_eventbrite_venues(events_list):
                 raise Exception('Could not connect to Eventbrite API at {}.  Status Code: {}'.format(url, r.status_code))
             data = json.loads(r.text)
             venues.append(data)
+
     return venues
 
 
 # Takes list of events hosted on EventBrite, list of venues, and list of all groups and returns formatted list of events
 def format_eventbrite_events(events_list, venues_list, group_list):
+
     venues = {}
     events = []
     for venue in venues_list:
@@ -197,6 +214,7 @@ def format_eventbrite_events(events_list, venues_list, group_list):
                 'status': normalize_eventbrite_status_codes(event.get('status'))
             }
             events.append(event_dict)
+
     return events
 
 
@@ -251,9 +269,9 @@ def filter_events_by_tag(events, tags):
 def normalize_eventbrite_status_codes(status):
     # takes current status from eventbrite, and matches it to meetup's vernacular
     status_dict = {
-        'started': 'upcoming',
-        'completed': 'past',
-        'canceled': 'cancelled'
+        'canceled': 'cancelled',
+        'live': 'upcoming',
+        'ended': 'past'
     }
 
     return status_dict.get(status)
