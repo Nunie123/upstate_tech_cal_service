@@ -142,13 +142,13 @@ def get_eventbrite_events(group_list):
     events = []
 
     # Number of days to allow for past events
-    days_in_the_past = config.get('past_events', 'days_in_the_past')
+    max_days_in_the_past = config.get('past_events', 'max_days_in_the_past')
 
     # the current date time in ISO8601 format
     current_time = (datetime.datetime.utcnow())
     # the current time minus days in config
 
-    start_date = (current_time - datetime.timedelta(int(days_in_the_past))).strftime('%Y-%m-%dT%H:%M:%SZ')
+    start_date = (current_time - datetime.timedelta(int(max_days_in_the_past))).strftime('%Y-%m-%dT%H:%M:%SZ')
     
     for group_id in group_ids:
  
@@ -273,29 +273,31 @@ def parse_date(d):
 
 
 # Takes list of events and returns list of events occuring in specified date range
-    def filter_events_by_date(events, start_date_str=datetime.datetime.now(datetime.timezone.utc), end_date_str=None):
+def filter_events_by_date(events, start_date_str=datetime.datetime.now(datetime.timezone.utc), end_date_str=None):
+    
+    # days_in_the_past = config.get('past_events', 'days_in_the_past')
+    # current_time = (datetime.datetime.utcnow())
+    # if start_date_str:
+    #     start_date = (current_time - datetime.timedelta(int(days_in_the_past))).strftime('%Y-%m-%dT%H:%M:%SZ')
         
-        # number of days specified in config
-        days_in_the_past = config.get('past_events', 'days_in_the_past')
+        
+    # else:
+    #     start_date = None
+    start_date = parse_date(start_date_str) if start_date_str else None
+    end_date = parse_date(end_date_str) if end_date_str else None
 
-        if start_date_str:
-            start_date = parse_date(start_date_str) - datetime.timedelta(days_in_the_past)
-        else:
-            start_date = None
-        end_date = parse_date(end_date_str) if end_date_str else None
+    if isinstance(start_date, str) or isinstance(end_date, str):
+        return '{}{}'.format(start_date, end_date).replace('None', '')
 
-        if isinstance(start_date, str) or isinstance(end_date, str):
-            return '{}{}'.format(start_date, end_date).replace('None', '')
-
-        if start_date and end_date:
-            return [event for event in events if start_date <= parse(event['time']) <= end_date]
-        elif start_date:
-            return [event for event in events if parse(event['time']) >= start_date]
-        elif end_date:
-            return [event for event in events if parse(event['time']) <= end_date]
-        else:
-            
-            return events
+    if start_date and end_date:
+        return [event for event in events if start_date <= parse(event['time']) <= end_date]
+    elif start_date:
+        return [event for event in events if parse(event['time']) >= start_date]
+    elif end_date:
+        return [event for event in events if parse(event['time']) <= end_date]
+    else:
+        
+        return events
 
 
 # Takes list of events and string of tags to return list of events with specified tags
@@ -322,9 +324,13 @@ def normalize_eventbrite_status_codes(status):
 
 @app.route('/api/gtc', methods=['GET', 'POST'])
 def get_dates():
+    if request.args.get('start_date'):
+        start_date = request.args.get('start_date', datetime.datetime.now(datetime.timezone.utc))
+    else: 
+        default_days_in_the_past = config.get('past_events', 'default_days_in_the_past')
+        current_time = (datetime.datetime.utcnow())
+        start_date = (current_time - datetime.timedelta(int(default_days_in_the_past))).strftime('%Y-%m-%dT%H:%M:%SZ')
 
-    start_date = request.args.get('start_date', datetime.datetime.now(datetime.timezone.utc))
-   
     end_date = request.args.get('end_date', None)
     tags = request.args.get('tags', None)
     with open('all_meetings.json') as json_data:
@@ -333,7 +339,7 @@ def get_dates():
         events = filter_events_by_tag(events_date_filter, tags)
 
         # Sort events by time
-        events.sort(key=lambda s: s['time'])
+        events_json.sort(key=lambda s: s['time'])
         return jsonify(events)
 
 
