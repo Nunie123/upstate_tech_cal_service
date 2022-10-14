@@ -75,6 +75,7 @@ def format_json_ld(events_json):
                 "@type": "VirtualLocation",
                 "url": event.get('url')
             }
+            eventAttendanceMode = "https://schema.org/OnlineEventAttendanceMode"
         else:
             location = {
                 "@type": "Place",
@@ -92,18 +93,27 @@ def format_json_ld(events_json):
                     "longitude": event.get('venue').get('lon'),
                     }
                 }
-            
+            eventAttendanceMode = "https://schema.org/OfflineEventAttendanceMode"
+        
+        if event['status'] == 'upcoming' or event['status'] == 'past':
+            eventStatus = "https://schema.org/EventScheduled"
+        elif event['status'] == 'cancelled':
+            eventStatus = "https://schema.org/EventCancelled"
+        
         element = {
             "@type": "DataFeedItem",
             "dateCreated": event.get("created_at"), 
             "dateModified": event.get('data_as_of'),
+            "eventAttendanceMode": eventAttendanceMode,
+            "eventStatus": eventStatus,
             "item": {
                 "@type": "Event",
                 "description": event.get('description'), 
                 "name": event.get('event_name'), 
                 "organizer": {
                     "@type": "Organization",
-                    "name": event.get('group_name')
+                    "name": event.get('group_name'),
+                    "url": event.get('group_url'),
                         }, 
                 "nid": event.get('nid'),
                 "rsvp_count": event.get('rsvp_count'),
